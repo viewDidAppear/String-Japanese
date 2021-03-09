@@ -1,7 +1,7 @@
 /*
 		MIT License
 
-		Copyright (c) 2018 Benjamin Dietzkis
+		Copyright (c) 2020 Benjamin Dietzkis
 
 		Permission is hereby granted, free of charge, to any person obtaining a copy
 		of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@ import Foundation
 extension String.UTF16View {
 	subscript(index: Int) -> UTF16.CodeUnit {
 		get {
-			return self[String.UTF16Index.init(encodedOffset: index)]
+			return self[self.index(self.startIndex, offsetBy: index)]
 		}
 		set {
 			self[index] = newValue

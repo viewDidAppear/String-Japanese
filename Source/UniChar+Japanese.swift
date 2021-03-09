@@ -1,7 +1,7 @@
 /*
 		MIT License
 
-		Copyright (c) 2018 Benjamin Dietzkis
+		Copyright (c) 2020 Benjamin Dietzkis
 
 		Permission is hereby granted, free of charge, to any person obtaining a copy
 		of this software and associated documentation files (the "Software"), to deal
@@ -26,58 +26,72 @@ import Foundation
 
 extension UniChar {
 
-	// MARK: - UNICODE Helper ユニコードのヘルパー
+	// MARK: - Unicode Helper Functions
 	
 	private func inRange(_ char: UniChar, lowerBound: UniChar, upperBound: UniChar) -> Bool {
-		return (lowerBound <= char) && (char <= upperBound)
+		(lowerBound <= char) && (char <= upperBound)
 	}
 	
-	// MARK: - カタカナ、平仮名 | Japanese Syllabic Character Set
-	
+	// MARK: - Syllabilic Character Sets
+
 	var isHiragana: Bool {
-		return inRange(self, lowerBound: 0x3040, upperBound: 0x309F)
+		inRange(self, lowerBound: 0x3040, upperBound: 0x309F)
 	}
 	
 	var isKatakana: Bool {
-		return inRange(self, lowerBound: 0x30A0, upperBound: 0x30FF) && (self != 0x30FB || inRange(self, lowerBound: 0xFF66, upperBound: 0xFF9F))
+		inRange(self, lowerBound: 0x30A0, upperBound: 0x30FF) && (self != 0x30FB || inRange(self, lowerBound: 0xFF66, upperBound: 0xFF9F))
 	}
 	
 	// MARK: - 漢字 | Chinese-origin Characters
 	
 	var isKanji: Bool {
-		return (inRange(self, lowerBound: 0x2E80, upperBound: 0x2EFF) || inRange(self, lowerBound: 0x2F00, upperBound: 0x2FDF) || inRange(self, lowerBound: 0x4E00, upperBound: 0x9FAF))
+		(inRange(self, lowerBound: 0x2E80, upperBound: 0x2EFF) || inRange(self, lowerBound: 0x2F00, upperBound: 0x2FDF) || inRange(self, lowerBound: 0x4E00, upperBound: 0x9FAF))
 	}
 	
-	// MARK: - 句点、読点、空白 | Circular Period, Comma, Space
-	
+	// MARK: - PunctuationCircular Period, Comma, Space
+
+    /// "Kuten" meaning "empty mark" is the circular period mark used in the Japanese language
+    /// It appears as so 　→　 。
 	var isKuten: Bool {
-		return self == 0x3001 || self == 0xFF64 || self == 0xFF0E
+		self == 0x3001 || self == 0xFF64 || self == 0xFF0E
 	}
-	
+
+    /// "Touten" meaning "reading mark" is the reverse direction (to English) comma used in the Japanese language
+    /// It appears as so 　→　 、
 	var isTouten: Bool {
 		return self == 0x3002 || self == 0xFF61 || self == 0xFF0C
 	}
-	
+
+    /// "Kuuhaku" meaning "empty space" or just "space" is the Japanese equivalent of a whitespace character.
+    /// It is always represented in Zenkaku, meaning it occupies the same amount of space as a regular Hiragana, Katakana or Kanji.
 	var isKuuhaku: Bool {
 		return self == 0x3000
 	}
 	
-	// MARK: - 半角カタカナ、全角ローマ字、数字集合 | Half-width Katakana, Full-width Romaji, Full-width Numeric
-	
+	// MARK: - Half-width Katakana, Full-width Romaji, Full-width Numeric
+
+    /// "Hankaku Katakana" meaning "half-width angular Japanese syllable" is a half-standard width rendering of an ordinary Katakana glyph.
+    /// Katakana is almost exclusively used to represent foreign loan words, and as such they can wind up quite long.
+    /// A half width example would be ｺﾝﾋﾞﾆ as opposed to コンビニ
 	var isHankakuKatakana: Bool {
 		return inRange(self, lowerBound: 0xFF61, upperBound: 0xFF9F)
 	}
-	
+
+    /// "Zenkaku Romaji" meaning "full-width roman charater" is a roman character which takes up the same amount of space as a standard Japanese glyph.
+    /// 例えば、この分にはｆｕｌｌ　ｗｉｄｔｈ字が入ってます。
 	var isZenkakuRomaji: Bool {
 		return inRange(self, lowerBound: 0xFF01, upperBound: 0xFF5E)
 	}
-	
+
+    /// "Zenkaku Numerical" meaning "full-width numerical character" is an arabic numeral which takes up the same amount of space as a standard Japanese glyph.
+    /// 例えば、この分には１０００は全角数字が入ってます。
 	var isZenkakuNumerical: Bool {
 		return inRange(self, lowerBound: 0xFF10, upperBound: 0xFF19)
 	}
 	
-	// MARK: - 日本語特異的字 | Japanese Specific Characters
-	
+	// MARK: - Japanese Specific Characters
+
+    /// Some characters in the Japanese syllabary do not map directly to Roman representation.
 	var isSpecificToJapanese: Bool {
 		return inRange(self, lowerBound: 0x3040, upperBound: 0x30FF) || inRange(self, lowerBound: 0xFF01, upperBound: 0xFF9F) || isKuten || isTouten
 	}

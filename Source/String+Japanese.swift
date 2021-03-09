@@ -1,7 +1,7 @@
 /*
 		MIT License
 
-		Copyright (c) 2018 Benjamin Dietzkis
+		Copyright (c) 2020 Benjamin Dietzkis
 
 		Permission is hereby granted, free of charge, to any person obtaining a copy
 		of this software and associated documentation files (the "Software"), to deal
@@ -33,12 +33,11 @@ extension String {
 		case hankakuKatakana
 		case compound
 		case kanji
-		case hoka
+		case other
 	}
 	
 	enum CharacterClass {
 		case kuuhaku
-		case hoka
 		case hiragana
 		case katakana
 		case kanji
@@ -49,6 +48,7 @@ extension String {
 		case zenkakuRomaji
 		case zenkakuSuujishuugou
 		case ascii
+        case other
 	}
 	
 	/*
@@ -129,30 +129,30 @@ extension String {
 		} else if char.isHankakuKatakana {
 			return .hankakuKatakana
 		} else {
-			return .hoka
+			return .other
 		}
 	}
 	
 	private func japaneseType(of string: String) -> JapaneseType {
-		var lastCharClass: CharacterClass = .hoka
-		
-		for i in 0..<string.count {
-				let char = string.utf16[i]
-				let charClass = characterClass(for: char)
-			
-			if i == 0 {
-					lastCharClass = charClass
-			} else {
-				if lastCharClass != charClass {
-					if charClass == .katakana || charClass == .hiragana || charClass == .kanji || charClass == .hankakuKatakana {
-							return .compound
-					}
-					
-					return .hoka
-				}
-			}
-				
-		}
+		var lastCharClass: CharacterClass = .other
+
+        for i in 0..<string.count {
+            let char = string.utf16[i]
+            let charClass = characterClass(for: char)
+
+            if i == 0 {
+                lastCharClass = charClass
+            } else {
+                if lastCharClass != charClass {
+                    if charClass == .katakana || charClass == .hiragana || charClass == .kanji || charClass == .hankakuKatakana {
+                        return .compound
+                    }
+
+                    return .other
+                }
+            }
+
+        }
 
 		if lastCharClass == .hiragana {
 			return .hiragana
@@ -164,10 +164,10 @@ extension String {
 			return .hankakuKatakana
 		}
 		
-		return .hoka
+		return .other
 	}
 	
-	/// Return an optionally token-delimited Latin representation of self, where self contains identifiable Japanese text.
+	/// Return an optionally token-delimited Roman representation of self, where self contains identifiable Japanese text.
 	/// Use of custom transliteration rules is recommended when you expect alternate readings of words. Example: You expect なん instead of みなみ (Nan, as opposed to Minami).
 	///
 	/// - Parameter separator: Supply an optional separator.
@@ -269,7 +269,7 @@ extension String {
 	}
 	
 	/// Return a Latin representation of self, where self contains identifiable Japanese text.
-	/// Use of custom transliteration rules is recommended when you expect alternate readings of words. Example: You expect なん instead of みなみ (Nan, as opposed to Minami).
+	/// Use of custom transliteration rules is recommended when you expect alternate readings of words. Example: When you expect the Onyomi reading of 南 (なん) instead of the Kunyomi reading (みなみ).
 	var toRomaji: String {
 		guard containsJapanese else { return self }
 		return toRomaji()
